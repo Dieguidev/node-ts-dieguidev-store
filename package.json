@@ -1,15 +1,15 @@
 {
   "name": "dieguidev-store",
   "version": "1.0.0",
-  "description": "",
+  "description": "Ecommerce",
   "main": "index.js",
   "scripts": {
     "dev": "tsnd --respawn --clear src/app.ts",
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && tsc && npm run prisma:migrate:prod",
     "start": "npm run build && node dist/app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Dieguidev",
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

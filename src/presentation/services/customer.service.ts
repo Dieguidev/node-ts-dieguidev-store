@@ -118,8 +118,6 @@ export class CustomerService {
         throw CustomError.badRequest('Customer not created');
       }
 
-
-
       return customer;
     } catch (error) {
       throw CustomError.internalServer(`${error}`)
