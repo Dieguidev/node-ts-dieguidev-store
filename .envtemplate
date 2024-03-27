@@ -1,0 +1,28 @@
+PORT=3000
+
+
+POSTGRES_USER=postgres
+POSTGRES_DB_NAME=dieguidev-store
+POSTGRES_PASSWORD=123456
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+DATABASE_URL="postgresql://postgres:123456@localhost:5432/dieguidev-store?schema=public"
+
+JWT_SECRET=
+
+WEBSERVICE_URL=http://localhost:3000
+
+
+SEND_EMAIL=false
+MAILER_SERVICE=gmail
+MAILER_EMAIL=
+MAILER_SECRET_KEY=
+
+
+# This was inserted by `prisma init`:
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
