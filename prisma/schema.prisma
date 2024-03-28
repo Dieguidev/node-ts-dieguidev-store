@@ -32,6 +32,7 @@ model customer {
   user_id   Int      @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  order     order[]
 }
 
 model category {
@@ -44,13 +45,34 @@ model category {
 }
 
 model product {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar
-  image       String   @db.VarChar
-  description String   @db.Text
+  id          Int            @id @default(autoincrement())
+  name        String         @unique @db.VarChar
+  image       String         @db.VarChar
+  description String         @db.Text
   price       Int
-  category    category @relation(fields: [category_id], references: [id])
+  category    category       @relation(fields: [category_id], references: [id])
   category_id Int // Campo de clave foránea
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  orders      orderproduct[]
+}
+
+model order {
+  id          Int            @id @default(autoincrement())
+  customer    customer       @relation(fields: [customer_id], references: [id])
+  customer_id Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  products    orderproduct[]
+}
+
+model orderproduct {
+  id         Int      @id @default(autoincrement())
+  amount     Int
+  order      order    @relation(fields: [order_id], references: [id])
+  product    product  @relation(fields: [product_id], references: [id])
+  order_id   Int
+  product_id Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
