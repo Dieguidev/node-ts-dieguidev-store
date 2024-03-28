@@ -13,3 +13,8 @@ export * from './dtos/shared/pagination.dto'
 
 
 export * from './dtos/customer/update-customer'
+
+export * from './dtos/category/create-category.dto'
+
+
+export * from './dtos/products/create-products'
