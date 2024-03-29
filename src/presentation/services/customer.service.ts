@@ -54,13 +54,6 @@ export class CustomerService {
         })
       ])
 
-      // const listUsers = categories.map(user => ({
-      //   email: user.email,
-      //   name: user.name,
-      //   available: user.available,
-      // })
-      // )
-
       return {
         page,
         limit,

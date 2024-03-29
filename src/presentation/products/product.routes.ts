@@ -17,9 +17,11 @@ export class ProductRoutes {
 
     // Definir las rutas
     router.get('/', controller.getAllProducts);
+    router.get('/price-range', controller.getAllProductsWithPriceRange);
     router.get('/:id', controller.getById);
     router.post('/', controller.createProduct );
     router.put('/:id', controller.updateCustomer );
+
 
     // router.get('/validate-email/:token', controller.validateEmail );
 

@@ -17,14 +17,18 @@ export class ProductService {
   }
 
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto, price: number) {
     const { page, limit } = paginationDto;
     const skip = (page - 1) * limit;
+
+
+
 
     try {
       const [total, products] = await Promise.all([
         prisma.product.count(),
         prisma.product.findMany({
+          where: price ? { price } : {},
           skip: skip,
           take: limit,
           include: {
@@ -44,9 +48,48 @@ export class ProductService {
     } catch (error) {
       throw CustomError.internalServer(`${error}`)
     }
-
-
   }
+
+
+
+  async findAllWithPriceRange(paginationDto: PaginationDto, min: number, max: number) {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+
+
+
+    try {
+      const [total, products] = await Promise.all([
+        prisma.product.count(),
+        prisma.product.findMany({
+          where: {
+            price: {
+              gte: min, // Mayor o igual que el precio mínimo
+              lte: max  // Menor o igual que el precio máximo
+            }
+          },
+          skip: skip,
+          take: limit,
+          include: {
+            category: true
+          }
+        })
+      ])
+
+      return {
+        page,
+        limit,
+        total: total,
+        next: (total - (page * limit)) > 0 ? `/api/products?page=${page + 1}&limit=${limit}` : null,
+        prev: (page - 1 > 0) ? `/api/products?page=${page - 1}&limit=${limit}` : null,
+        products
+      };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`)
+    }
+  }
+
 
 
   async createProduct(createProductDto: CreateProductDto) {

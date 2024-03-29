@@ -52,11 +52,25 @@ export class ProductController {
   }
 
   getAllProducts = (req: Request, res: Response) => {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, price } = req.query;
     const [error, paginationDto] = PaginationDto.create(+page, +limit);
     if (error) return res.status(400).json({ error });
+    if (price && isNaN(Number(price))) return res.status(400).json({ error: 'Price not number' });
 
-    this.productService.findAll(paginationDto!)
+    this.productService.findAll(paginationDto!, +price!)
+      .then(products => res.status(200).json( products ))
+      .catch(error => this.handleError(error, res))
+  }
+
+
+  getAllProductsWithPriceRange = (req: Request, res: Response) => {
+    const { page = 1, limit = 10, minPrice, maxPrice } = req.query;
+    const [error, paginationDto] = PaginationDto.create(+page, +limit);
+    if (error) return res.status(400).json({ error });
+    if (!minPrice && isNaN(Number(minPrice))) return res.status(400).json({ error: 'Minimum price required or is it not a number' });
+    if (!maxPrice && isNaN(Number(maxPrice))) return res.status(400).json({ error: 'Maximun price required or is it not a number' });
+
+    this.productService.findAllWithPriceRange(paginationDto!, +minPrice!, +maxPrice!)
       .then(products => res.status(200).json( products ))
       .catch(error => this.handleError(error, res))
   }
