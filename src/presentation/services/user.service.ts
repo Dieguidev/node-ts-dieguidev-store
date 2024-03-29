@@ -26,12 +26,9 @@ export class UserService {
     const { page, limit } = paginationDto;
     const skip = (page - 1) * limit;
 
-
     try {
 
       const [total, users] = await Promise.all([
-        // User.count(),
-        // User.findAll({offset: skip, limit})
         prisma.user.count(),
         prisma.user.findMany({
           skip: skip,
@@ -51,21 +48,8 @@ export class UserService {
               }
             }
           }
-          // select: {
-          //   email: true,
-          //   name: true,
-          //   available: true,
-          //   category: true
-          // }
         })
       ])
-
-      // const listUsers = categories.map(user => ({
-      //   email: user.email,
-      //   name: user.name,
-      //   available: user.available,
-      // })
-      // )
 
       return {
         page,

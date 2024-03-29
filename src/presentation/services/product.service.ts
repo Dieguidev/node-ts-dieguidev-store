@@ -1,5 +1,5 @@
 import { prisma } from "../../data/prisma";
-import { CreateProductDto, CustomError } from "../../domain";
+import { CreateProductDto, CustomError, PaginationDto } from "../../domain";
 import { UpdateProductDto } from "../../domain/dtos/products/update-product.dto";
 
 
@@ -10,9 +10,6 @@ export class ProductService {
   async findOne(id: number) {
     const product = await prisma.product.findFirst({
       where: { id },
-      // select: {
-      //   email: true,
-      // }
     })
     if (!product) throw CustomError.badRequest('Product not found');
 
@@ -20,13 +17,35 @@ export class ProductService {
   }
 
 
-  async findAll() {
-    const products = await prisma.product.findMany({
-      include: {
-         category: true,
-       }
-    })
-    return products;
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    try {
+      const [total, products] = await Promise.all([
+        prisma.product.count(),
+        prisma.product.findMany({
+          skip: skip,
+          take: limit,
+          include: {
+            category: true
+          }
+        })
+      ])
+
+      return {
+        page,
+        limit,
+        total: total,
+        next: (total - (page * limit)) > 0 ? `/api/products?page=${page + 1}&limit=${limit}` : null,
+        prev: (page - 1 > 0) ? `/api/products?page=${page - 1}&limit=${limit}` : null,
+        products
+      };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`)
+    }
+
+
   }
 
 
@@ -43,18 +62,20 @@ export class ProductService {
         throw CustomError.badRequest('Category not found')
       }
 
-      const product = await prisma.product.create({ data: {
-        name,
-        image,
-        // category: {
-        //   connect: {
-        //     id: +categoryId
-        //   }
-        // },
-        category_id: +categoryId,
-        description,
-        price: Number(price),
-      } })
+      const product = await prisma.product.create({
+        data: {
+          name,
+          image,
+          // category: {
+          //   connect: {
+          //     id: +categoryId
+          //   }
+          // },
+          category_id: +categoryId,
+          description,
+          price: Number(price),
+        }
+      })
       return product;
 
     } catch (error) {
@@ -65,25 +86,25 @@ export class ProductService {
   async updateProduct(updateProductDto: UpdateProductDto) {
     await this.findOne(+updateProductDto.id);
 
-    if(+updateProductDto.categoryId){
+    if (+updateProductDto.categoryId) {
       const category = await prisma.category.findFirst({
-        where:{id: +updateProductDto.categoryId}
-        });
-      if(!category) throw CustomError.badRequest('Category not found');
+        where: { id: +updateProductDto.categoryId }
+      });
+      if (!category) throw CustomError.badRequest('Category not found');
     }
 
-    const { id ,categoryId,...rest } = updateProductDto;
+    const { id, categoryId, ...rest } = updateProductDto;
     const product = await prisma.product.update({
       where: { id: +id },
       data: {
         ...rest,
-        price: (rest.price)? (+rest.price): undefined,
+        price: (rest.price) ? (+rest.price) : undefined,
         // category: {
         //   connect: {
         //     id: +rest.categoryId
         //   }
         // },
-        category_id: (categoryId)? (+categoryId): undefined
+        category_id: (categoryId) ? (+categoryId) : undefined
       },
     })
     return product;

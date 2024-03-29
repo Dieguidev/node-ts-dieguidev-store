@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CustomError } from "../../domain";
+import { CustomError, PaginationDto } from "../../domain";
 import { OrderService } from "../services/oreder.service";
 import { CreateOrderDto } from "../../domain/dtos/order/create-order.dto";
 import { AddProductInOrderDto } from '../../domain/dtos/order/add-product-in-order.dto';
@@ -53,7 +53,11 @@ export class OrderController {
   }
 
   getAllOrders = (req: Request, res: Response) => {
-    this.orderService.findAll()
+    const { page = 1, limit = 10 } = req.query;
+    const [error, paginationDto] = PaginationDto.create(+page, +limit);
+    if (error) return res.status(400).json({ error });
+
+    this.orderService.findAll(paginationDto!)
       .then(orders => res.status(200).json({ orders }))
       .catch(error => this.handleError(error, res))
   }

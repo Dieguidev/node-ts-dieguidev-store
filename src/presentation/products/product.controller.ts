@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ProductService } from "../services/product.service";
-import { CreateProductDto, CustomError } from "../../domain";
+import { CreateProductDto, CustomError, PaginationDto } from "../../domain";
 import { UpdateProductDto } from "../../domain/dtos/products/update-product.dto";
 
 
@@ -52,8 +52,12 @@ export class ProductController {
   }
 
   getAllProducts = (req: Request, res: Response) => {
-    this.productService.findAll()
-      .then(products => res.status(200).json({ products }))
+    const { page = 1, limit = 10 } = req.query;
+    const [error, paginationDto] = PaginationDto.create(+page, +limit);
+    if (error) return res.status(400).json({ error });
+
+    this.productService.findAll(paginationDto!)
+      .then(products => res.status(200).json( products ))
       .catch(error => this.handleError(error, res))
   }
 }

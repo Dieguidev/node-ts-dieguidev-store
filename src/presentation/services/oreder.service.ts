@@ -1,5 +1,5 @@
 import { prisma } from "../../data/prisma";
-import { CustomError } from "../../domain";
+import { CustomError, PaginationDto } from "../../domain";
 import { AddProductInOrderDto } from "../../domain/dtos/order/add-product-in-order.dto";
 import { CreateOrderDto } from "../../domain/dtos/order/create-order.dto";
 
@@ -36,18 +36,44 @@ export class OrderService {
     };
   }
 
-  async findAll() {
-    const orders = await prisma.order.findMany({
-      include: {
-        customer: {
-          include: {
-            user: true
-          }
-        }
 
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    try {
+      const [total, orders] = await Promise.all([
+        prisma.order.count(),
+        prisma.order.findMany({
+          skip: skip,
+          take: limit,
+          include: {
+            customer: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email:true,
+                    role: true
+                  }
+                }
+              }
+            }
+          }
+        })
+      ])
+
+      return {
+        page,
+        limit,
+        total,
+        next: (total - (page * limit)) > 0 ? `/api/order?page=${page + 1}&limit=${limit}` : null,
+        prev: (page - 1 > 0) ? `/api/order?page=${page - 1}&limit=${limit}` : null,
+        orders
       }
-    })
-    return { orders };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`)
+    }
   }
 
 
